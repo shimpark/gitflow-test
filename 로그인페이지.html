@@ -1,16 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인페이지</title>
+    <title>회의실 상태</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f3f4f6;
+        }
+
+        .top-section {
+            background-color: #00c4d6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 70%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .bottom-section {
+            background-color: #0097b3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(23, 1fr);
+            gap: 1px;
+            width: 100%;
+            height: 60px;
+            border-collapse: collapse;
+        }
+
+        .timeline div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            border: 1px solid white;
+            background-color: #0097b3;
+        }
+
+        .timeline div.highlight {
+            background-color: #F0F0F0 !important;
+            color: #333333;
+        }
+
+        .time-display {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            text-align: right;
+        }
+    </style>
 </head>
+
 <body>
-    
-    gitlab flow 간단하다. 개선 해보자.
-    
-    <div class="box" style="border: 0cm;color: chocolate;">
-        로그인
+    <div class="w-full h-full flex flex-col">
+        <!-- Top Section with Status and Room Info -->
+        <div class="top-section flex flex-col justify-between text-white">
+            <!-- Available Status Positioned at the Top -->
+            <div class="flex flex-col items-start mb-4">
+                <h1 class="text-6xl font-extrabold">7F_B(8)</h1>
+                <p class="text-3xl mt-2">회의 중</p>
+            </div>
+
+            <!-- Room Info Positioned Below Status -->
+            <div class="flex justify-between items-center">
+                <div class="flex flex-col">                    
+                    <p class="text-3xl" style="margin-bottom:10px" id="reservation-time">
+                        13:30 ~ 15:30
+                    </p>
+                    <!-- Meeting Title Display -->
+                    <h2 class="text-4xl font-semibold" id="room-name">오늘은 회의</h2>
+                </div>
+            </div>
+
+            <!-- Time Display Positioned at the Top Right -->
+            <div class="time-display">
+                <h2 class="text-3xl font-semibold" id="current-time">11:31:13 AM</h2>
+                <p class="text-xl">2024-09-10</p>
+            </div>
+        </div>
+
+        <!-- Bottom Section with Timeline -->
+        <div class="bottom-section">
+            <!-- Timeline Grid with IDs for each time slot -->
+            <div class="timeline">
+                <div id="0800">08:00</div>
+                <div id="0830">08:30</div>
+                <div id="0900">09:00</div>
+                <div id="0930">09:30</div>
+                <div id="1000">10:00</div> <!-- Highlighted for reserved time -->
+                <div id="1030">10:30</div> <!-- Highlighted for reserved time -->
+                <div id="1100">11:00</div> <!-- Highlighted for reserved time -->
+                <div id="1130">11:30</div> <!-- Highlighted for reserved time -->
+                <div id="1200">12:00</div>
+                <div id="1230">12:30</div>
+                <div id="1300">13:00</div>
+                <div id="1330">13:30</div>
+                <div id="1400">14:00</div>
+                <div id="1430">14:30</div>
+                <div id="1500">15:00</div>
+                <div id="1530">15:30</div>
+                <div id="1600">16:00</div>
+                <div id="1630">16:30</div>
+                <div id="1700">17:00</div>
+                <div id="1730">17:30</div>
+                <div id="1800">18:00</div>
+                <div id="1830">18:30</div>
+                <div id="1900">19:00</div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function getRandomTime() {
+            // 08:00 ~ 19:00 사이의 랜덤한 시간 생성
+            const hour = Math.floor(Math.random() * 12) + 8; // 8시부터 19시까지
+            const minute = Math.random() < 0.5 ? '00' : '30'; // 0 또는 30 분
+            return `${String(hour).padStart(2, '0')}${minute}`;
+        }
+
+        function updateRandomTimes() {
+            let newStartTime, newEndTime;
+
+            // 시작 시간이 종료 시간보다 작아야 하므로, 조건을 만족할 때까지 반복
+            do {
+                newStartTime = getRandomTime();
+                newEndTime = getRandomTime();
+            } while (parseInt(newStartTime) >= parseInt(newEndTime));
+
+            startTime = newStartTime;
+            endTime = newEndTime;
+
+            // 업데이트된 시간을 화면에 표시
+            document.getElementById('reservation-time').textContent = `${startTime.slice(0, 2)}:${startTime.slice(2)} ~ ${endTime.slice(0, 2)}:${endTime.slice(2)}`;
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHour = hours % 12 || 12;
+            const timeString = `${displayHour}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('current-time').textContent = timeString;
+
+            // Clear previous highlights
+            const timelineSlots = document.querySelectorAll('.timeline div');
+            timelineSlots.forEach(element => {
+                element.classList.remove('highlight');
+            });
+
+            // Parse start and end times into hours and minutes
+            const startHour = parseInt(startTime.slice(0, 2), 10);
+            const startMinute = parseInt(startTime.slice(2), 10);
+            const endHour = parseInt(endTime.slice(0, 2), 10);
+            const endMinute = parseInt(endTime.slice(2), 10);
+
+            // Calculate start and end slot indices based on parsed times
+            const startSlotIndex = (startHour - 8) * 2 + (startMinute === 30 ? 1 : 0);
+            const endSlotIndex = (endHour - 8) * 2 + (endMinute === 30 ? 1 : 0);
+
+            // Apply highlights dynamically based on calculated indices
+            for (let i = startSlotIndex; i < endSlotIndex; i++) {
+                const slot = timelineSlots[i];
+                if (slot) {
+                    slot.classList.add('highlight');
+                }
+            }
+        }
+
+        // 10분마다 랜덤 시간 업데이트 및 화면 갱신
+        setInterval(() => {
+            updateRandomTimes();
+            updateTime();
+        }, 60000); // 1분 = 600,00 밀리초
+
+        setInterval(updateTime, 1000); // 1초마다 현재 시간 갱신
+        updateRandomTimes(); // 초기 설정
+        updateTime(); // 초기 화면 갱신
+    </script>
+
 </body>
+
 </html>
